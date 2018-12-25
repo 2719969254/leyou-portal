@@ -56,12 +56,14 @@
             margin-right: 10px;
         }
 
-        /*        .logo-list li{
-                    padding:8px;
-                }
-               .logo-list li:hover{
-                    background-color: #f3f3f3;
-                }*/
+        .logo-list li {
+            padding: 8px;
+        }
+
+        .logo-list li:hover {
+            background-color: #f3f3f3;
+        }
+
         .type-list a:hover {
             color: #1299ec;
         }
@@ -124,43 +126,24 @@
             </div>
             <!--selector-->
             <div class="clearfix selector">
-                <div class="type-wrap">
-                    <div class="fl key">分类</div>
+                <div class="type-wrap" v-for="f in filters" :key="f.k" v-if="f.k !== 'brandId'">
+                    <div class="fl key" v-text="f.k === 'cid3' ? '分类' : f.k"></div>
                     <div class="fl value">
                         <ul class="type-list">
-                            <li>
-                                <a>手机</a>
+                            <li v-for="(o,i) in f.options" :key="i">
+                                <a v-text="o.name"></a>
                             </li>
-                            <li>
-                                <a>儿童手表</a>
-                            </li>
+
                         </ul>
                     </div>
                     <div class="fl ext"></div>
                 </div>
-                <div class="type-wrap logo">
+                <div class="type-wrap logo" v-else>
                     <div class="fl key brand">品牌</div>
                     <div class="value logos">
-                        <ul class="logo-list">
-                            <li><img src="img/_/phone01.png"/></li>
-                            <li><img src="img/_/phone02.png"/></li>
-                            <li><img src="img/_/phone03.png"/></li>
-                            <li><img src="img/_/phone04.png"/></li>
-                            <li><img src="img/_/phone05.png"/></li>
-                            <li><img src="img/_/phone06.png"/></li>
-                            <li><img src="img/_/phone07.png"/></li>
-                            <li><img src="img/_/phone08.png"/></li>
-                            <li><img src="img/_/phone09.png"/></li>
-                            <li><img src="img/_/phone10.png"/></li>
-                            <li><img src="img/_/phone11.png"/></li>
-                            <li><img src="img/_/phone12.png"/></li>
-                            <li><img src="img/_/phone13.png"/></li>
-                            <li><img src="img/_/phone14.png"/></li>
-                            <li><img src="img/_/phone05.png"/></li>
-                            <li><img src="img/_/phone06.png"/></li>
-                            <li><img src="img/_/phone07.png"/></li>
-                            <li style="text-align: center"><a style="line-height: 30px; font-size: 12px" href="#">黑马</a>
-                            </li>
+                        <ul class="logo-list" v-for="(o,i) in f.options" :key="i">
+                            <li v-if="o.image"><img :src="o.image"/></li>
+                            <li v-else><a href="#" v-text="o.name"></a></li>
                         </ul>
                     </div>
                     <div class="fl ext">
@@ -471,6 +454,7 @@
             goodsList: [],
             total: 0,
             totalPage: 0,
+            filters: [] // 过滤参数集合
 
         },
         created() {
@@ -495,6 +479,17 @@
                         goods.selected = goods.skus[0];
                     });
                     this.goodsList = resp.data.items;
+                    //过滤项
+                    //商品分类
+                    this.filters.push({
+                        k: "cid3",
+                        options: resp.data.categories
+                    });
+                    //商品品牌
+                    this.filters.push({
+                        k: "brandId",
+                        options: resp.data.brands
+                    })
                 });
             },
             index(i) {
@@ -525,14 +520,14 @@
                 /*handler() {
                     this.loadData();
                 }*/
-                 handler(val,old){
-                     if(!old || !old.key){
-                         // 如果旧的search值为空，或者search中的key为空，证明是第一次
-                         return;
-                     }
-                     // 把search对象变成请求参数，拼接在url路径
+                handler(val, old) {
+                    if (!old || !old.key) {
+                        // 如果旧的search值为空，或者search中的key为空，证明是第一次
+                        return;
+                    }
+                    // 把search对象变成请求参数，拼接在url路径
                     location.search = "?" + ly.stringify(this.search);
-                 }
+                }
             }
         },
         components: {
