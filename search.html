@@ -126,7 +126,7 @@
             </div>
             <!--selector-->
             <div class="clearfix selector">
-                <div class="type-wrap" v-for="(f,i) in filters" v-show="i < 5 || showMore" :key="f.k"
+                <div class="type-wrap" v-for="(f,i) in remainFilter" v-show="i < 5 || showMore" :key="f.k"
                      v-if="f.k !== 'brandId'">
                     <div class="fl key" v-text="f.k === 'cid3' ? '分类' : f.k"></div>
                     <div class="fl value">
@@ -253,7 +253,7 @@
                     <div class="fl ext">
                     </div>
                 </div>-->
-                <div class="type-wrap" style="text-align: center">
+                <div class="type-wrap" style="text-align: center" v-show="remainFilter.length > 5">
                     <v-btn small flat v-show="!showMore" @click="showMore=true">
                         更多
                         <v-icon>arrow_drop_down</v-icon>
@@ -535,16 +535,26 @@
                 }
             },
             selectFilter(key, option) {
-                const {... obj} = this.search.filter;
+                const {...obj} = this.search.filter;
                 obj[key] = option;
                 //添加到search.filter
                 this.search.filter = obj;
             },
         },
 
+        computed: {
+            remainFilter(){
+                //获取已选择项的key
+                const keys = Object.keys(this.search.filter);
+                //完成对已选择的过滤项过滤
+                return this.filters.filter(f => !keys.includes(f.k) && f.options.length > 1);
+
+            }
+        },
+
         components: {
             lyTop: () => import("./js/pages/top.js")
-        }
+        },
     });
 </script>
 <!-- 底部栏位 -->
