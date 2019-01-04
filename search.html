@@ -108,18 +108,17 @@
                 <!--面包屑-->
                 <ul class="fl sui-breadcrumb">
                     <li><span>全部结果:</span></li>
-                    <li><a href="#">手机</a></li>
-                    <li><span>手机通讯</span></li>
+                    <li v-for="(c,i) in breads" :key="i">
+                        <a href="#" v-if="i < 2">{{c.name}}</a>
+                        <span v-else>{{c.name}}</span>
+                    </li>
+
                 </ul>
                 <!--已选择过滤项-->
                 <ul class="tags-choose">
-                    <li class="tag">
-                        品牌:<span style="color: red">apple</span>
-                        <i class="sui-icon icon-tb-close"></i>
-                    </li>
-                    <li class="tag">
-                        内存:<span style="color: red">4G</span>
-                        <i class="sui-icon icon-tb-close"></i>
+                    <li class="tag" v-for="(v,k) in search.filter" :key="k">
+                        {{k === 'brandId' ? '品牌' : k}}:<span style="color: red" v-text="findValue(k,v)"></span>
+                        <i class="sui-icon icon-tb-close" @click="deleteFilter(k)"></i>
                     </li>
                 </ul>
                 <div class="clearfix"></div>
@@ -458,6 +457,8 @@
             totalPage: 0,
             filters: [], // 过滤参数集合
             showMore: false,
+            breads:"", //面包屑
+            price:'' //价格区间
 
         },
         created() {
@@ -499,9 +500,16 @@
                         //初始化被选中sku
                         goods.selected = goods.skus[0];
                     });
+
+
                     this.goodsList = resp.data.items;
                     //过滤项
                     //商品分类
+                    if (resp.data.categories.length === 1) {
+                        //如果只有一个，那么就查询三级商品分类，显示到面包屑
+                        ly.http.get("/item/category/all/level?id=" + resp.data.categories[0].id)
+                            .then(resp => this.breads = resp.data);
+                    }
                     this.filters.push({
                         k: "cid3",
                         options: resp.data.categories
@@ -540,10 +548,24 @@
                 //添加到search.filter
                 this.search.filter = obj;
             },
+            findValue(k, v) {
+                if (!this.filters) {
+                    return;
+                }
+                if (k !== 'brandId') {
+                    return v;
+                }
+                return this.filters.find(f => f.k === 'brandId').options[0].name;
+            },
+            deleteFilter(k) {
+                const {...obj} = this.search.filter;
+                delete obj[k];
+                this.search.filter = obj;
+            },
         },
 
         computed: {
-            remainFilter(){
+            remainFilter() {
                 //获取已选择项的key
                 const keys = Object.keys(this.search.filter);
                 //完成对已选择的过滤项过滤
